@@ -12,6 +12,8 @@ import java.util.logging.Logger;
 import java.net.http.HttpResponse.*;
 import java.time.Duration;
 import java.util.*;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class Main
 {
@@ -22,6 +24,10 @@ public class Main
 
     public static final Font DEFAULT_FONT = new Font("Arial", Font.PLAIN, 16);
     public static final Font TITLE_FONT = new Font("Arial", Font.BOLD, 18);
+
+    private static final HttpClient CLIENT = HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(5)).build();
+    private static final ObjectMapper MAPPER = new ObjectMapper();
+    private static final Logger LOGGER = Logger.getLogger(Main.class.getName());
 
     /**
      * @param args the command line arguments
@@ -87,41 +93,59 @@ public class Main
         return players[i];
     }
 
-    private static String nickFromUUID(String UUID) //sends uuid to Mojang API to obtain nickname
+    //sends uuid to Mojang API to obtain nickname. Returns "! player not found !" if player doesn't exist, and "! no response !" if request fails.
+    private static String nickFromUUID(String rawUuid)
     {
-        String apiURL = "https://sessionserver.mojang.com/session/minecraft/profile/" + UUID;
+        if(rawUuid == null || rawUuid.isBlank())
+            return "! wrong UUID !";
+        String uuid = rawUuid.replace("-", "");
+        if (!uuid.matches("^[0-9a-fA-F]{32}$"))
+            return "! wrong UUID !";
+
+
+        String apiUrl = "https://sessionserver.mojang.com/session/minecraft/profile/" + uuid;
         try
         {
-            HttpClient client = HttpClient.newHttpClient();
+            HttpRequest request = HttpRequest.newBuilder().uri(new URI(apiUrl)).GET().timeout(Duration.ofSeconds(5)).build();
 
-            HttpRequest request = HttpRequest.newBuilder().uri(new URI(apiURL)).GET().timeout(Duration.ofSeconds(10)).build();
+            HttpResponse<String> response = CLIENT.send(request, BodyHandlers.ofString());
 
-            HttpResponse<String> response = client.send(request, BodyHandlers.ofString());
+            int statusCode = response.statusCode();
+
+
+            if(statusCode >= 500 || statusCode == 429)
+                return "! no response !";
+
+            if(statusCode == 404 || statusCode == 204)
+                return "! player not found !";
 
             String responseBody = response.body();
 
-            String[] respSplit = responseBody.split("\"");
-            if(respSplit.length < 8)
-                return "! name not found !"; //player doesn't exist (sometimes happens when using bots on server)
-            return respSplit[7]; //8th field in the split response always is the nick
+            if(responseBody == null || responseBody.isBlank())
+                return "! player not found !";
+
+            JsonNode root = MAPPER.readTree(responseBody);
+            JsonNode nameNode = root.get("name");
+
+            if(nameNode == null || nameNode.isNull())
+                return "! player not found !";
+
+            return nameNode.asText();
 
         }
-        catch (MalformedURLException ex)
+        catch (URISyntaxException e)
         {
-            Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (URISyntaxException ex)
+            LOGGER.log(Level.SEVERE, "Niepoprawny URI", e);
+        } catch (InterruptedException e)
         {
-            Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (InterruptedException ex)
+            Thread.currentThread().interrupt();
+            LOGGER.log(Level.WARNING, "Przerwano żądanie", e);
+        } catch (IOException e)
         {
-            Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (IOException ex)
-        {
-            Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
+            LOGGER.log(Level.WARNING, "Błąd I/O", e);
         }
 
-
-        return "! no response !"; //if no response from API
+        return "! no response !";
     }
 
     private static File[] getFilesBySize(String dirPath) //gets all files from folder. Orders by descending file size so most active players are first.

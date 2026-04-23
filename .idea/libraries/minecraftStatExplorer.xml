@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="minecraftStatExplorer">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/minecraftStatExplorer.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>
