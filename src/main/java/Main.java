@@ -68,7 +68,7 @@ public class Main
         for(int i = 0; i < allFiles.length; i++)
         {
             tempUUID = allFiles[i].getName().replace(".json", ""); //get uuid
-            players[i] = new Player(tempUUID, nickFromUUID(tempUUID));
+            players[i] = new Player(tempUUID, nickFromUUID(tempUUID)); //TODO add caching
             players[i].loadFromJson(getJsonString(allFiles[i].getName())); //load statistics for player
             loadingLabel.setText("Loading players... " + (i+1) + "/" + allFiles.length); //log loading
             playerNameLabel.setText(players[i].getNick() + " loaded.");
