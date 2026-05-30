@@ -1,11 +1,17 @@
+package com.wt.mse.gui;
+
 import java.util.Comparator;
+import com.wt.mse.model.Player;
+import com.wt.mse.services.StatPresentationService;
+
+import java.util.List;
 
 public class DistanceStatWindow extends SingleStatWindow //window to format distance (as it's normally in cm)
 {
     private Comparator<String> distanceComparator;
-    public DistanceStatWindow(String category, String stat)
+    public DistanceStatWindow(String category, String stat, List<Player> players, StatPresentationService presentationService)
     {
-        super(category, stat, true); //setup window according to superclass
+        super(category, stat, players, presentationService, true); //setup window according to superclass
 
         distanceComparator = (String s1, String s2) -> //comparator for formatted distance
         {
@@ -24,24 +30,6 @@ public class DistanceStatWindow extends SingleStatWindow //window to format dist
         };
 
         sorter.setComparator(2, distanceComparator);
-        totalLabel.setText("Server Total:" + distanceToString(serverTotal));
-    }
-
-    @Override
-    protected String[][] getPlayerData()
-    {
-        String[][] statData = super.getPlayerData(); //load 0th and 1st column (2nd column is empty)
-        for(int i = 0; i < Main.getPlayers().length; i++)
-        {
-            statData[i][2] = distanceToString(Long.parseLong(statData[i][1].trim())); //add 2nd, formatted column
-        }
-        return statData;
-    }
-    private String distanceToString(long distance) //distance is in cm
-    {
-        long cm = distance % 100;
-        long m = (distance/100)%1000;
-        long km = (distance/100000);
-        return "  " + km + " km, " + m + " m, " + cm + " cm";
+        totalLabel.setText("Server Total:" + presentationService.formatDistance(serverTotal));
     }
 }

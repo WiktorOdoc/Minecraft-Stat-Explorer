@@ -1,41 +1,29 @@
-# MINECRAFT STATISTICS EXPLORER
-By Wiktor Tomczak 160069
+# Minecraft Statistics Explorer
 
-The program provides an interface to see statistics of players from a minecraft world.
+Small desktop app for browsing Minecraft player statistics from a world save.
 
-## Requirements:
-The program was created in Windows 10, Java version 22.0.1, should work for java version 11+
+## What it does
+- Reads `UUID.json` stat files from the `stats/` directory.
+- Resolves player nicknames through the Mojang API.
+- Shows per-category tables, top records, and per-player detail windows.
 
-The program requires an internet connection (to load player nicknames from the Mojang api). Sometimes Mojang servers are not working.
+## Project structure
+- `src/main/java/com/wt/mse/services` - loading, parsing, formatting, and orchestration logic.
+- `src/main/java/com/wt/mse/gui` - Swing windows and table rendering.
+- `src/main/java/com/wt/mse/model` - data objects.
+- `src/test/java/com/wt/mse/services` - JUnit tests for parsing and service logic.
 
-To run the program, use the realase `.jar` file, or compile manually:
-Open terminal in directory containing `src` folder
-run commands:
+## Requirements
+- Java 22
+- Internet access for nickname lookup
 
-`javac -d out src/*.java`
+## Run locally
+```bash
+mvn test
+```
 
-`jar cfe minecraftStatExplorer.jar Main -C out .`
+To launch the app, run the `com.wt.mse.Main` class from your IDE or build a jar with Maven.
 
-Make sure the stats folder with .json files is in the same directory as the .jar file !!! (example stats folder is given)
-
-To run, open the jar file or run command `java -jar minecraftStatExplorer.jar`
-
-
-
-## Explanation:
-Minecraft stores player statistics inside files UUID.json located in the world folder, where UUID is a unique constant id assigned to a player.
-
-Using an API provided by Mojang, the player's nickname can be obtained from the UUID.
-
-In the UUID.json file, there are all statistics of the player divided into 9 categories.
-
-
-This program reads all statistics from the files and organizes them.
-
-The main window is separated into scrollable tabs, each for different category.
-
-There all statistics are displayed, along with the highest scorer.
-
-Clicking on a statistic opens a window showing all players and their score in that statistic.
-
-Clicking on a column label sorts according to that column.
+## Notes
+- The app expects a `stats/` folder next to the working directory.
+- The repo now has GitHub Actions configured to run `mvn test` on push and pull request.
