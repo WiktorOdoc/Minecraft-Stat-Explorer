@@ -114,16 +114,6 @@ public class StatPresentationService
         return formattingService.numericComparator();
     }
 
-    public java.util.Comparator<String> timeComparator()
-    {
-        return formattingService.timeComparator();
-    }
-
-    public java.util.Comparator<String> distanceComparator()
-    {
-        return formattingService.distanceComparator();
-    }
-
     public String formatTime(long ticks)
     {
         return formattingService.formatTime(ticks);

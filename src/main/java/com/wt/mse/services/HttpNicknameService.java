@@ -81,16 +81,16 @@ public class HttpNicknameService implements NicknameService
         }
         catch(URISyntaxException e)
         {
-            LOGGER.log(Level.SEVERE, "Niepoprawny URI", e);
+            LOGGER.log(Level.SEVERE, "Wrong URI", e);
         }
         catch(InterruptedException e)
         {
             Thread.currentThread().interrupt();
-            LOGGER.log(Level.WARNING, "Przerwano żądanie", e);
+            LOGGER.log(Level.WARNING, "Request interrupted", e);
         }
         catch(IOException e)
         {
-            LOGGER.log(Level.WARNING, "Błąd I/O", e);
+            LOGGER.log(Level.WARNING, "IO error", e);
         }
 
         return "! no response !";
